@@ -31,6 +31,9 @@ public class RouterConfig {
         router.put("/updateAccount/:id")
                 .handler(accountHandler::updateAccount);
 
+        router.put("/sendMoney/:id")
+                .handler(accountHandler::sendMoney);
+
         router.delete("/delete/:id")
                 .handler(accountHandler::deleteAccount);
 

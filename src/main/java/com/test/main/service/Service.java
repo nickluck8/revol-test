@@ -10,4 +10,6 @@ public interface Service<T, R> {
     T update(R id, T t);
 
     T delete(R id);
+
+    void transferMoney(String id, String toAccount, Double amount);
 }

@@ -23,7 +23,7 @@ public class AccountService implements Service<Account, String> {
     @Override
     public List<Account> get() {
         logger.debug("-- loading persons --");
-        List<Account> accounts = repository.get();
+        List<Account> accounts = repository.getAll();
         return Objects.nonNull(accounts) ? accounts : Collections.emptyList();
     }
 
@@ -58,4 +58,39 @@ public class AccountService implements Service<Account, String> {
 
         return repository.delete(accountId);
     }
+
+    @Override
+    public void transferMoney(String id, String toAccountId, Double amount) {
+        Long fromAccountId = Long.valueOf(id);
+        Long parsedToAccountId = Long.valueOf(toAccountId);
+
+        Account fromAccount = repository.getById(fromAccountId);
+        Account toAccount = repository.getById(parsedToAccountId);
+        if (Objects.isNull(fromAccount) || Objects.isNull(toAccount)) {
+            throw new IllegalArgumentException("Wrong account(s)");
+        }
+        Object monitor1 = fromAccount.getId() < toAccount.getId() ? fromAccount : toAccount;
+        Object monitor2 = fromAccount.getId() > toAccount.getId() ? fromAccount : toAccount;
+
+        synchronized (monitor1) {
+            synchronized (monitor2) {
+                if (fromAccount.getAmount() < amount) {
+                    throw new IllegalArgumentException(
+                            String.format("Not enough amount for account %s, available: %s, required: %s",
+                                    id, fromAccount.getAmount(), amount));
+                }
+
+                if (fromAccount.getId().equals(toAccount.getId())) {
+                    throw new IllegalArgumentException("Accounts must be different");
+                }
+
+                fromAccount.setAmount(fromAccount.getAmount() - amount);
+                toAccount.setAmount(toAccount.getAmount() + amount);
+                repository.transferMoney(fromAccount, toAccount);
+            }
+        }
+
+
+    }
+
 }

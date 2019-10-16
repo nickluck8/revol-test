@@ -12,7 +12,7 @@ public class AccountRepository implements Repository<Account, Long> {
     private static SessionFactory sessionFactory = HibernateUtils.getSessionFactory();
 
     @Override
-    public List<Account> get() {
+    public List<Account> getAll() {
         List<Account> accounts;
         try (Session session = sessionFactory.openSession()) {
             accounts = session.createQuery("FROM Account").list();
@@ -72,5 +72,30 @@ public class AccountRepository implements Repository<Account, Long> {
         }
 
         return accountToDelete;
+    }
+
+    @Override
+    public Account getById(Long id) {
+        Account account;
+        try (Session session = sessionFactory.openSession()) {
+            account = session.get(Account.class, id);
+        }
+        return account;
+    }
+
+    @Override
+    public void transferMoney(Account fromAccount, Account toAccount) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            session.saveOrUpdate(fromAccount);
+            session.saveOrUpdate(toAccount);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        }
     }
 }

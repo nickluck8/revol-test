@@ -1,9 +1,11 @@
 package com.test.main.handler;
 
+import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.test.main.config.RouterConfig;
 import com.test.main.model.Account;
 import com.test.main.service.Service;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.RoutingContext;
@@ -38,25 +40,40 @@ public class AccountHandler {
                 .end(Json.encodePrettily(delete));
     }
 
+    public void sendMoney(RoutingContext routingContext) {
+        logger.debug("Send money request received");
+        String id = routingContext.request().getParam("id");
+        JsonObject body = routingContext.getBodyAsJson();
+        Double amount = body.getDouble("amount");
+        String toAccountId = body.getString("accountId");
+
+        if (!isIdValid(id) || !isIdValid(toAccountId)) {
+            sendBadRequestResponse(routingContext);
+            return;
+        }
+
+        service.transferMoney(id, toAccountId, amount);
+
+        routingContext.response().setStatusCode(204).end();
+    }
+
     public void updateAccount(RoutingContext routingContext) {
         logger.debug("Put request received ");
-        Pair<? extends Exception, Account> accountPair = decodeValue(routingContext, Account.class);
-        if (accountPair.getLeft() != null) {
-            sendBadRequestResponse(routingContext);
-            return;
-        }
         String id = routingContext.request().getParam("id");
-        if (!isIdValid(id)) {
+
+        Pair<? extends Exception, Account> accountPair = decodeValue(routingContext, Account.class);
+        if (accountPair.getLeft() != null || !isIdValid(id)) {
             sendBadRequestResponse(routingContext);
             return;
         }
+
         service.update(id, accountPair.getRight());
 
         routingContext.response().setStatusCode(204).end();
     }
 
     public void processCreate(RoutingContext routingContext) {
-        logger.debug("Request received post request");
+        logger.debug("Post request request");
         Pair<? extends Exception, Account> newAccount = decodeValue(routingContext, Account.class);
         if (newAccount.getLeft() != null) {
             sendBadRequestResponse(routingContext);

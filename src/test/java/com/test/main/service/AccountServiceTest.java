@@ -60,26 +60,26 @@ class AccountServiceTest {
     }
 
     @Test
-    @DisplayName("Get: test get is valid")
+    @DisplayName("Get: test getAll is valid")
     void testGetIsValid() {
         List<Account> accounts = new ArrayList<>();
         accounts.add(account);
         accounts.add(account);
         accounts.add(account);
-        when(repository.get()).thenReturn(accounts);
+        when(repository.getAll()).thenReturn(accounts);
         List<Account> accountList = accountService.get();
 
-        verify(repository, times(1)).get();
+        verify(repository, times(1)).getAll();
         Assertions.assertEquals(accountList, accounts);
     }
 
     @Test
-    @DisplayName("Get: test get is valid with empty list")
+    @DisplayName("Get: test getAll is valid with empty list")
     void testGetIsValidWithEmptyList() {
-        when(repository.get()).thenReturn(Collections.emptyList());
+        when(repository.getAll()).thenReturn(Collections.emptyList());
         List<Account> accountList = accountService.get();
 
-        verify(repository, times(1)).get();
+        verify(repository, times(1)).getAll();
         Assertions.assertIterableEquals(accountList, Collections.emptyList());
     }
 
@@ -124,4 +124,50 @@ class AccountServiceTest {
         Assertions.assertEquals(update, account);
     }
 
+    @Test
+    @DisplayName("MoneyTransfer: test MoneyTransfer is valid")
+    void testMoneyTransferIsValid() {
+        Account dummyAccount = new Account();
+        dummyAccount.setAmount(20D);
+        dummyAccount.setId(2L);
+        double beforeUpdate = account.getAmount();
+        double dummyBeforeUpdate = dummyAccount.getAmount();
+        double amount = 20D;
+        when(repository.getById(1L)).thenReturn(account);
+        when(repository.getById(2L)).thenReturn(dummyAccount);
+
+        accountService.transferMoney("1", "2", amount);
+
+        verify(repository, times(1)).transferMoney(any(), any());
+        Assertions.assertEquals(account.getAmount(), beforeUpdate - amount);
+        Assertions.assertEquals(dummyAccount.getAmount(), dummyBeforeUpdate + amount);
+    }
+
+    @Test
+    @DisplayName("MoneyTransfer: test money transfer with invalid accounts")
+    void testMoneyTransferAccountsAreSame() {
+        when(repository.getById(1L)).thenReturn(account);
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> accountService.transferMoney("1", "1", 20D),
+                "Wrong account(s)");
+
+
+    }
+
+    @Test
+    @DisplayName("MoneyTransfer: test money transfer not enough amount")
+    void testMoneyTransferNotEnoughAmount() {
+        account.setAmount(10D);
+        Account dummyAccount = new Account();
+        dummyAccount.setAmount(20D);
+        dummyAccount.setId(2L);
+        double amount = 20D;
+        when(repository.getById(1L)).thenReturn(account);
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> accountService.transferMoney("1", "1", 20D),
+                String.format("Not enough amount for account %s, available: %s, required: %s",
+                        1L, 10D, amount));
+    }
 }

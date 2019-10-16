@@ -114,7 +114,7 @@ class AccountHandlerTest {
     }
 
     @Test
-    @DisplayName("Get: Test get is valid")
+    @DisplayName("Get: Test getAll is valid")
     void testGet() {
         List<Account> accountList = new ArrayList<>();
         accountList.add(account);
@@ -125,7 +125,7 @@ class AccountHandlerTest {
     }
 
     @Test
-    @DisplayName("Get: Test get is valid with empty body")
+    @DisplayName("Get: Test getAll is valid with empty body")
     void testGetBodyIsEmpty() {
         when(service.get()).thenReturn(Collections.emptyList());
         when(response.putHeader(anyString(), anyString())).thenReturn(response);
