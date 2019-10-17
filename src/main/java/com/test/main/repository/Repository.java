@@ -14,4 +14,6 @@ public interface Repository<T, R> {
     T getById(R id);
 
     void transferMoney(T fromAccount, T toAccount);
+
+    T getByIdForUpdate(R id);
 }

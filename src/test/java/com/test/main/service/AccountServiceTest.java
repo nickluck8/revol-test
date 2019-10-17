@@ -133,8 +133,8 @@ class AccountServiceTest {
         double beforeUpdate = account.getAmount();
         double dummyBeforeUpdate = dummyAccount.getAmount();
         double amount = 20D;
-        when(repository.getById(1L)).thenReturn(account);
-        when(repository.getById(2L)).thenReturn(dummyAccount);
+        when(repository.getByIdForUpdate(1L)).thenReturn(account);
+        when(repository.getByIdForUpdate(2L)).thenReturn(dummyAccount);
 
         accountService.transferMoney("1", "2", amount);
 
@@ -146,7 +146,7 @@ class AccountServiceTest {
     @Test
     @DisplayName("MoneyTransfer: test money transfer with invalid accounts")
     void testMoneyTransferAccountsAreSame() {
-        when(repository.getById(1L)).thenReturn(account);
+        when(repository.getByIdForUpdate(1L)).thenReturn(account);
 
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> accountService.transferMoney("1", "1", 20D),
@@ -163,7 +163,7 @@ class AccountServiceTest {
         dummyAccount.setAmount(20D);
         dummyAccount.setId(2L);
         double amount = 20D;
-        when(repository.getById(1L)).thenReturn(account);
+        when(repository.getByIdForUpdate(1L)).thenReturn(account);
 
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> accountService.transferMoney("1", "1", 20D),

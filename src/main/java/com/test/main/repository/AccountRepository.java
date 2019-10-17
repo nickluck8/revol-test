@@ -2,6 +2,7 @@ package com.test.main.repository;
 
 import com.test.main.model.Account;
 import com.test.main.util.HibernateUtils;
+import org.hibernate.LockMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -97,5 +98,14 @@ public class AccountRepository implements Repository<Account, Long> {
             }
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public Account getByIdForUpdate(Long id) {
+        Account account;
+        try (Session session = sessionFactory.openSession()) {
+            account = session.get(Account.class, id, LockMode.PESSIMISTIC_WRITE);
+        }
+        return account;
     }
 }

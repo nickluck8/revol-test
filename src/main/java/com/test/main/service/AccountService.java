@@ -64,8 +64,8 @@ public class AccountService implements Service<Account, String> {
         Long fromAccountId = Long.valueOf(id);
         Long parsedToAccountId = Long.valueOf(toAccountId);
 
-        Account fromAccount = repository.getById(fromAccountId);
-        Account toAccount = repository.getById(parsedToAccountId);
+        Account fromAccount = repository.getByIdForUpdate(fromAccountId);
+        Account toAccount = repository.getByIdForUpdate(parsedToAccountId);
         if (Objects.isNull(fromAccount) || Objects.isNull(toAccount)) {
             throw new IllegalArgumentException("Wrong account(s)");
         }
